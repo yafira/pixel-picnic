@@ -1,5 +1,46 @@
+import type { Metadata } from "next";
 import DitherTool from "@/components/DitherTool";
 import RepeatHero from "@/components/RepeatHero";
+
+type SearchParams = { [key: string]: string | string[] | undefined };
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}): Promise<Metadata> {
+  const sp = await searchParams;
+  const pick = (key: string): string | undefined =>
+    typeof sp[key] === "string" ? (sp[key] as string) : undefined;
+
+  const algo = pick("algo");
+  const grain = pick("grain");
+  const exposure = pick("exposure");
+  const palette = pick("palette");
+  const preset = pick("preset");
+
+  if (!algo && !grain && !exposure && !palette) {
+    return {}; // no share params — inherit the default metadata from layout.tsx
+  }
+
+  const ogParams = new URLSearchParams();
+  if (algo) ogParams.set("algo", algo);
+  if (grain) ogParams.set("grain", grain);
+  if (exposure) ogParams.set("exposure", exposure);
+  if (palette) ogParams.set("palette", palette);
+  if (preset) ogParams.set("preset", preset);
+
+  const title = preset
+    ? `pixel picnic — ${preset}`
+    : "pixel picnic — dither / exposure";
+  const ogImage = `/og?${ogParams.toString()}`;
+
+  return {
+    title,
+    openGraph: { title, images: [ogImage] },
+    twitter: { card: "summary_large_image", title, images: [ogImage] },
+  };
+}
 
 export default function Home() {
   return (
@@ -23,6 +64,7 @@ export default function Home() {
           <a href="#">upload</a>
           <a href="/eink">e-ink export</a>
           <a href="/fabrication">fabrication</a>
+          <a href="/punchcard">punch card</a>
         </nav>
       </header>
 

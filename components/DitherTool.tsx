@@ -80,6 +80,7 @@ export default function DitherTool() {
   const [dragging, setDragging] = useState(false);
   const [dims, setDims] = useState({ w: MAX_DISPLAY, h: MAX_DISPLAY });
   const [comparePos, setComparePos] = useState(50);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const regenPlaceholder = useCallback(() => {
     makePlaceholder().then((img) => {
@@ -108,6 +109,30 @@ export default function DitherTool() {
 
   useEffect(() => {
     regenPlaceholder();
+
+    const params = new URLSearchParams(window.location.search);
+    const algoParam = params.get("algo");
+    const grainParam = params.get("grain");
+    const exposureParam = params.get("exposure");
+    const paletteParam = params.get("palette");
+
+    if (
+      algoParam &&
+      ["threshold", "bayer", "floyd", "atkinson"].includes(algoParam)
+    ) {
+      setAlgorithm(algoParam as Algorithm);
+    }
+    if (grainParam) {
+      const g = parseInt(grainParam, 10);
+      if (!isNaN(g)) setGrain(Math.max(1, Math.min(12, g)));
+    }
+    if (exposureParam) {
+      const e = parseInt(exposureParam, 10);
+      if (!isNaN(e)) setExposure(Math.max(-80, Math.min(80, e)));
+    }
+    if (paletteParam === "ink" || paletteParam === "bw") {
+      setPalette(paletteParam);
+    }
   }, [regenPlaceholder]);
 
   const render = useCallback(() => {
@@ -184,6 +209,24 @@ export default function DitherTool() {
     link.download = "pixel-picnic.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
+  }
+
+  function handleCopyLink() {
+    const params = new URLSearchParams();
+    params.set("algo", algorithm);
+    params.set("grain", String(grain));
+    params.set("exposure", String(exposure));
+    params.set("palette", palette);
+    if (activePresetKey) params.set("preset", activePresetKey);
+
+    const query = `?${params.toString()}`;
+    const url = `${window.location.origin}${window.location.pathname}${query}`;
+    window.history.replaceState(null, "", query);
+
+    navigator.clipboard.writeText(url).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 1500);
+    });
   }
 
   const specLine = `${activePresetKey ? PRESETS[activePresetKey].label + " · " : ""}${
@@ -443,6 +486,13 @@ export default function DitherTool() {
         <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
           <button className="mono" style={primaryBtn} onClick={handleDownload}>
             download png
+          </button>
+          <button
+            className="mono"
+            style={secondaryBtn}
+            onClick={handleCopyLink}
+          >
+            {linkCopied ? "link copied" : "copy link"}
           </button>
           <button
             className="mono"

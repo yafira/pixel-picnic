@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { dither, Algorithm } from "@/lib/dither";
 
-const DISPLAY_SIZE = 640;
+const MAX_DISPLAY = 640;
 
 const ALGO_LABELS: Record<Algorithm, string> = {
   threshold: "threshold",
@@ -19,24 +19,43 @@ const INK: [number, number, number] = [20, 19, 15];
 const WHITE: [number, number, number] = [255, 255, 255];
 const BLACK: [number, number, number] = [0, 0, 0];
 
+const PLACEHOLDER_SIZE = 640;
+
 function makePlaceholder(): Promise<HTMLImageElement> {
   return new Promise((resolve) => {
     const off = document.createElement("canvas");
-    off.width = DISPLAY_SIZE;
-    off.height = DISPLAY_SIZE;
+    off.width = PLACEHOLDER_SIZE;
+    off.height = PLACEHOLDER_SIZE;
     const octx = off.getContext("2d")!;
-    const grad = octx.createLinearGradient(0, 0, DISPLAY_SIZE, DISPLAY_SIZE);
+    const grad = octx.createLinearGradient(
+      0,
+      0,
+      PLACEHOLDER_SIZE,
+      PLACEHOLDER_SIZE,
+    );
     grad.addColorStop(0, "#050505");
     grad.addColorStop(1, "#e8e8e8");
     octx.fillStyle = grad;
-    octx.fillRect(0, 0, DISPLAY_SIZE, DISPLAY_SIZE);
+    octx.fillRect(0, 0, PLACEHOLDER_SIZE, PLACEHOLDER_SIZE);
     octx.fillStyle = "#000";
     octx.beginPath();
-    octx.arc(DISPLAY_SIZE * 0.35, DISPLAY_SIZE * 0.45, 150, 0, Math.PI * 2);
+    octx.arc(
+      PLACEHOLDER_SIZE * 0.35,
+      PLACEHOLDER_SIZE * 0.45,
+      150,
+      0,
+      Math.PI * 2,
+    );
     octx.fill();
     octx.fillStyle = "#fff";
     octx.beginPath();
-    octx.arc(DISPLAY_SIZE * 0.68, DISPLAY_SIZE * 0.62, 90, 0, Math.PI * 2);
+    octx.arc(
+      PLACEHOLDER_SIZE * 0.68,
+      PLACEHOLDER_SIZE * 0.62,
+      90,
+      0,
+      Math.PI * 2,
+    );
     octx.fill();
     const img = new Image();
     img.onload = () => resolve(img);
@@ -46,6 +65,7 @@ function makePlaceholder(): Promise<HTMLImageElement> {
 
 export default function DitherTool() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const originalCanvasRef = useRef<HTMLCanvasElement>(null);
   const [sourceImg, setSourceImg] = useState<HTMLImageElement | null>(null);
   const [uploaded, setUploaded] = useState(false);
   const [algorithm, setAlgorithm] = useState<Algorithm>("bayer");
@@ -53,7 +73,8 @@ export default function DitherTool() {
   const [exposure, setExposure] = useState(0);
   const [palette, setPalette] = useState<Palette>("ink");
   const [dragging, setDragging] = useState(false);
-  const [dims, setDims] = useState({ w: DISPLAY_SIZE, h: DISPLAY_SIZE });
+  const [dims, setDims] = useState({ w: MAX_DISPLAY, h: MAX_DISPLAY });
+  const [comparePos, setComparePos] = useState(50);
 
   const regenPlaceholder = useCallback(() => {
     makePlaceholder().then((img) => {
@@ -72,8 +93,22 @@ export default function DitherTool() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const dw = Math.max(8, Math.floor(DISPLAY_SIZE / grain));
-    const dh = Math.max(8, Math.floor(DISPLAY_SIZE / grain));
+    const naturalW = sourceImg.naturalWidth || sourceImg.width;
+    const naturalH = sourceImg.naturalHeight || sourceImg.height;
+    const fitScale = MAX_DISPLAY / Math.max(naturalW, naturalH);
+    const displayW = Math.round(naturalW * fitScale);
+    const displayH = Math.round(naturalH * fitScale);
+
+    const originalCanvas = originalCanvasRef.current;
+    if (originalCanvas) {
+      originalCanvas.width = displayW;
+      originalCanvas.height = displayH;
+      const octx = originalCanvas.getContext("2d");
+      octx?.drawImage(sourceImg, 0, 0, displayW, displayH);
+    }
+
+    const dw = Math.max(8, Math.round(displayW / grain));
+    const dh = Math.max(8, Math.round(displayH / grain));
 
     const small = document.createElement("canvas");
     small.width = dw;
@@ -251,19 +286,87 @@ export default function DitherTool() {
             padding: 20,
           }}
         >
-          <canvas
-            ref={canvasRef}
-            width={DISPLAY_SIZE}
-            height={DISPLAY_SIZE}
-            style={{
-              width: "100%",
-              height: "auto",
-              display: "block",
-              imageRendering: "pixelated",
-              background: "var(--paper)",
-            }}
+          <div style={{ position: "relative" }}>
+            <canvas
+              ref={originalCanvasRef}
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                background: "var(--paper)",
+              }}
+            />
+            <canvas
+              ref={canvasRef}
+              width={MAX_DISPLAY}
+              height={MAX_DISPLAY}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                display: "block",
+                imageRendering: "pixelated",
+                background: "var(--paper)",
+                clipPath: `inset(0 ${100 - comparePos}% 0 0)`,
+              }}
+            />
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: `${comparePos}%`,
+                width: 1,
+                background: "var(--ink)",
+                transform: "translateX(-0.5px)",
+                pointerEvents: "none",
+              }}
+            />
+            <div
+              aria-hidden="true"
+              className="mono"
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: `${comparePos}%`,
+                transform: "translate(-50%, -50%)",
+                width: 28,
+                height: 28,
+                border: "1px solid var(--ink)",
+                background: "var(--paper)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 13,
+                pointerEvents: "none",
+              }}
+            >
+              ↔
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 10 }}>
+          <div
+            className="mono"
+            style={{ fontSize: 11, color: "var(--thread)", marginBottom: 6 }}
+          >
+            compare — drag to reveal original
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={1}
+            value={comparePos}
+            onChange={(e) => setComparePos(parseInt(e.target.value, 10))}
+            style={rangeStyle}
+            aria-label="Comparison position between dithered and original image"
           />
         </div>
+
         <div
           className="mono"
           style={{
@@ -286,7 +389,11 @@ export default function DitherTool() {
           <button className="mono" style={primaryBtn} onClick={handleDownload}>
             download png
           </button>
-          <button className="mono" style={secondaryBtn} onClick={regenPlaceholder}>
+          <button
+            className="mono"
+            style={secondaryBtn}
+            onClick={regenPlaceholder}
+          >
             new placeholder
           </button>
         </div>
@@ -298,7 +405,15 @@ export default function DitherTool() {
 function Step({ tag, children }: { tag: string; children: React.ReactNode }) {
   return (
     <div style={{ padding: "20px 0", borderBottom: "1px solid var(--line)" }}>
-      <span className="mono" style={{ fontSize: 11, color: "var(--thread)", marginBottom: 10, display: "block" }}>
+      <span
+        className="mono"
+        style={{
+          fontSize: 11,
+          color: "var(--thread)",
+          marginBottom: 10,
+          display: "block",
+        }}
+      >
         {tag}
       </span>
       {children}

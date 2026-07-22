@@ -1,4 +1,5 @@
 import DitherTool from "@/components/DitherTool";
+import RepeatHero from "@/components/RepeatHero";
 
 export default function Home() {
   return (
@@ -30,7 +31,7 @@ export default function Home() {
           className="mono"
           style={{ fontSize: 12, color: "var(--thread)", marginBottom: 18 }}
         >
-          concept 00 — bianchetto, digital
+          concept 00 — overpaint, digital
         </div>
         <h1
           style={{
@@ -60,6 +61,10 @@ export default function Home() {
           nothing is uploaded anywhere; it all happens in this tab.
         </p>
       </section>
+
+      <div style={{ padding: "0 28px 56px", maxWidth: 1200, margin: "0 auto" }}>
+        <RepeatHero />
+      </div>
 
       <DitherTool />
 

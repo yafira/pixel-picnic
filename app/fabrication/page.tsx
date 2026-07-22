@@ -1,6 +1,6 @@
-import DitherTool from "@/components/DitherTool";
+import FabricationExport from "@/components/FabricationExport";
 
-export default function Home() {
+export default function FabricationPage() {
   return (
     <>
       <header
@@ -12,14 +12,18 @@ export default function Home() {
           borderBottom: "1px solid var(--line)",
         }}
       >
-        <div className="mono" style={{ fontSize: 13 }}>
+        <a
+          href="/"
+          className="mono"
+          style={{ fontSize: 13, textDecoration: "none" }}
+        >
           ° 00
-        </div>
+        </a>
         <nav
           className="mono"
           style={{ display: "flex", gap: 28, fontSize: 12 }}
         >
-          <a href="#">upload</a>
+          <a href="/">tool</a>
           <a href="/eink">e-ink export</a>
           <a href="/fabrication">fabrication</a>
         </nav>
@@ -30,7 +34,7 @@ export default function Home() {
           className="mono"
           style={{ fontSize: 12, color: "var(--thread)", marginBottom: 18 }}
         >
-          concept 00 — bianchetto, digital
+          concept 00 — construction, physical
         </div>
         <h1
           style={{
@@ -42,26 +46,27 @@ export default function Home() {
             margin: "0 0 22px",
           }}
         >
-          expose the
+          from pixels
           <br />
-          construction.
+          to stitches.
         </h1>
         <p
           style={{
             fontSize: 16,
             lineHeight: 1.6,
             color: "#3a382f",
-            maxWidth: 520,
+            maxWidth: 560,
             margin: 0,
           }}
         >
-          a browser-based dithering tool. every photograph is reduced to its raw
-          pixel construction — the seams left visible instead of smoothed away.
-          nothing is uploaded anywhere; it all happens in this tab.
+          exports a real, physically-sized SVG — a grid of dots for laser
+          engraving halftones, or a single serpentine stitch path for digitizing
+          an embroidery fill on felt. set the cell size in millimeters and the
+          output carries its true dimensions, ready to import directly.
         </p>
       </section>
 
-      <DitherTool />
+      <FabricationExport />
 
       <footer
         className="mono"
@@ -74,7 +79,7 @@ export default function Home() {
           color: "var(--thread)",
         }}
       >
-        <span>pixel picnic — concept 00</span>
+        <span>pixel picnic — concept 00 — fabrication export</span>
         <span>2026</span>
       </footer>
     </>

@@ -25,6 +25,7 @@ export default function EinkPage() {
         >
           <a href="/">tool</a>
           <a href="/eink">e-ink export</a>
+          <a href="/fabrication">fabrication</a>
         </nav>
       </header>
 

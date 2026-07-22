@@ -1,0 +1,42 @@
+:root {
+  --paper: #f3f1e9;
+  --raw: #e4e0d3;
+  --ink: #14130f;
+  --thread: #9c9686;
+  --line: #cfc9b8;
+}
+
+* {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-archivo), sans-serif;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.mono {
+  font-family: var(--font-mono), monospace;
+  letter-spacing: 0.02em;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+select,
+input {
+  font-family: inherit;
+  color: inherit;
+}

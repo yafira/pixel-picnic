@@ -30,7 +30,10 @@ function clamp(v: number, min: number, max: number): number {
  * Reduces RGBA image data to a grayscale buffer at (width x height) with
  * exposure applied. width/height should already be the downsampled target size.
  */
-export function toGrayscale(imageData: ImageData, exposure: number): Float32Array {
+export function toGrayscale(
+  imageData: ImageData,
+  exposure: number,
+): Float32Array {
   const { data, width, height } = imageData;
   const gray = new Float32Array(width * height);
   for (let i = 0; i < width * height; i++) {
@@ -43,13 +46,21 @@ export function toGrayscale(imageData: ImageData, exposure: number): Float32Arra
   return gray;
 }
 
-export function ditherThreshold(gray: Float32Array, width: number, height: number): Uint8Array {
+export function ditherThreshold(
+  gray: Float32Array,
+  width: number,
+  height: number,
+): Uint8Array {
   const out = new Uint8Array(width * height);
   for (let i = 0; i < width * height; i++) out[i] = gray[i] > 128 ? 1 : 0;
   return out;
 }
 
-export function ditherBayer(gray: Float32Array, width: number, height: number): Uint8Array {
+export function ditherBayer(
+  gray: Float32Array,
+  width: number,
+  height: number,
+): Uint8Array {
   const out = new Uint8Array(width * height);
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -65,7 +76,7 @@ function errorDiffusion(
   gray: Float32Array,
   width: number,
   height: number,
-  distribute: (buf: Float32Array, x: number, y: number, err: number) => void
+  distribute: (buf: Float32Array, x: number, y: number, err: number) => void,
 ): Uint8Array {
   const buf = Float32Array.from(gray);
   const out = new Uint8Array(width * height);
@@ -83,17 +94,26 @@ function errorDiffusion(
   return out;
 }
 
-export function ditherFloydSteinberg(gray: Float32Array, width: number, height: number): Uint8Array {
+export function ditherFloydSteinberg(
+  gray: Float32Array,
+  width: number,
+  height: number,
+): Uint8Array {
   const idx = (x: number, y: number) => y * width + x;
   return errorDiffusion(gray, width, height, (buf, x, y, err) => {
     if (x + 1 < width) buf[idx(x + 1, y)] += (err * 7) / 16;
     if (x - 1 >= 0 && y + 1 < height) buf[idx(x - 1, y + 1)] += (err * 3) / 16;
     if (y + 1 < height) buf[idx(x, y + 1)] += (err * 5) / 16;
-    if (x + 1 < width && y + 1 < height) buf[idx(x + 1, y + 1)] += (err * 1) / 16;
+    if (x + 1 < width && y + 1 < height)
+      buf[idx(x + 1, y + 1)] += (err * 1) / 16;
   });
 }
 
-export function ditherAtkinson(gray: Float32Array, width: number, height: number): Uint8Array {
+export function ditherAtkinson(
+  gray: Float32Array,
+  width: number,
+  height: number,
+): Uint8Array {
   const idx = (x: number, y: number) => y * width + x;
   return errorDiffusion(gray, width, height, (buf, x, y, err) => {
     const e = err / 8;
@@ -111,7 +131,10 @@ export function ditherAtkinson(gray: Float32Array, width: number, height: number
  * The caller is responsible for downsampling to (width / grain, height / grain)
  * before calling this, since grain is a resampling decision, not a per-pixel one.
  */
-export function dither(imageData: ImageData, options: Omit<DitherOptions, "grain">): DitherResult {
+export function dither(
+  imageData: ImageData,
+  options: Omit<DitherOptions, "grain">,
+): DitherResult {
   const { width, height } = imageData;
   const gray = toGrayscale(imageData, options.exposure);
   let cells: Uint8Array;
@@ -127,6 +150,134 @@ export function dither(imageData: ImageData, options: Omit<DitherOptions, "grain
       break;
     case "atkinson":
       cells = ditherAtkinson(gray, width, height);
+      break;
+  }
+  return { width, height, cells };
+}
+
+// ---------------------------------------------------------------------------
+// N-level quantization, for panels that support more than pure black/white
+// (e.g. the IT8951-driven e-ink panels, which support 2/4/8/16 gray levels).
+// Output cells are level indices 0..levels-1, not just 0/1. Use levelToGray()
+// to convert an index back to an actual 0-255 gray byte for rendering/export.
+// ---------------------------------------------------------------------------
+
+/** Converts a level index (0..levels-1) to a 0-255 gray byte, evenly spaced. */
+export function levelToGray(level: number, levels: number): number {
+  if (levels <= 1) return 0;
+  return Math.round((level / (levels - 1)) * 255);
+}
+
+function quantizeThresholdLevels(
+  gray: Float32Array,
+  width: number,
+  height: number,
+  levels: number,
+): Uint8Array {
+  const step = 255 / (levels - 1);
+  const out = new Uint8Array(width * height);
+  for (let i = 0; i < width * height; i++) {
+    out[i] = clamp(Math.round(gray[i] / step), 0, levels - 1);
+  }
+  return out;
+}
+
+function quantizeBayerLevels(
+  gray: Float32Array,
+  width: number,
+  height: number,
+  levels: number,
+): Uint8Array {
+  const step = 255 / (levels - 1);
+  const out = new Uint8Array(width * height);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = y * width + x;
+      // Bayer offset spans one quantization step, centered at zero.
+      const offset = ((BAYER_4X4[y % 4][x % 4] + 0.5) / 16 - 0.5) * step;
+      out[i] = clamp(Math.round((gray[i] + offset) / step), 0, levels - 1);
+    }
+  }
+  return out;
+}
+
+function quantizeErrorDiffusionLevels(
+  gray: Float32Array,
+  width: number,
+  height: number,
+  levels: number,
+  distribute: (buf: Float32Array, x: number, y: number, err: number) => void,
+): Uint8Array {
+  const step = 255 / (levels - 1);
+  const buf = Float32Array.from(gray);
+  const out = new Uint8Array(width * height);
+  const idx = (x: number, y: number) => y * width + x;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = idx(x, y);
+      const old = clamp(buf[i], 0, 255);
+      const level = clamp(Math.round(old / step), 0, levels - 1);
+      out[i] = level;
+      const err = old - level * step;
+      distribute(buf, x, y, err);
+    }
+  }
+  return out;
+}
+
+/**
+ * Same pipeline as dither(), but quantizes to an arbitrary number of gray
+ * levels instead of pure black/white. levels=2 reproduces the binary result.
+ */
+export function ditherLevels(
+  imageData: ImageData,
+  options: Omit<DitherOptions, "grain"> & { levels: number },
+): DitherResult {
+  const { width, height } = imageData;
+  const { algorithm, exposure, levels } = options;
+  const gray = toGrayscale(imageData, exposure);
+  const idx = (x: number, y: number) => y * width + x;
+
+  let cells: Uint8Array;
+  switch (algorithm) {
+    case "threshold":
+      cells = quantizeThresholdLevels(gray, width, height, levels);
+      break;
+    case "bayer":
+      cells = quantizeBayerLevels(gray, width, height, levels);
+      break;
+    case "floyd":
+      cells = quantizeErrorDiffusionLevels(
+        gray,
+        width,
+        height,
+        levels,
+        (buf, x, y, err) => {
+          if (x + 1 < width) buf[idx(x + 1, y)] += (err * 7) / 16;
+          if (x - 1 >= 0 && y + 1 < height)
+            buf[idx(x - 1, y + 1)] += (err * 3) / 16;
+          if (y + 1 < height) buf[idx(x, y + 1)] += (err * 5) / 16;
+          if (x + 1 < width && y + 1 < height)
+            buf[idx(x + 1, y + 1)] += (err * 1) / 16;
+        },
+      );
+      break;
+    case "atkinson":
+      cells = quantizeErrorDiffusionLevels(
+        gray,
+        width,
+        height,
+        levels,
+        (buf, x, y, err) => {
+          const e = err / 8;
+          if (x + 1 < width) buf[idx(x + 1, y)] += e;
+          if (x + 2 < width) buf[idx(x + 2, y)] += e;
+          if (x - 1 >= 0 && y + 1 < height) buf[idx(x - 1, y + 1)] += e;
+          if (y + 1 < height) buf[idx(x, y + 1)] += e;
+          if (x + 1 < width && y + 1 < height) buf[idx(x + 1, y + 1)] += e;
+          if (y + 2 < height) buf[idx(x, y + 2)] += e;
+        },
+      );
       break;
   }
   return { width, height, cells };

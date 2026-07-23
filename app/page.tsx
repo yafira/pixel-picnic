@@ -62,9 +62,7 @@ export default function Home() {
           style={{ display: "flex", gap: 28, fontSize: 12 }}
         >
           <a href="#">upload</a>
-          <a href="/eink">e-ink export</a>
           <a href="/fabrication">fabrication</a>
-          <a href="/punchcard">punch card</a>
         </nav>
       </header>
 

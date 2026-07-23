@@ -24,9 +24,7 @@ export default function FabricationPage() {
           style={{ display: "flex", gap: 28, fontSize: 12 }}
         >
           <a href="/">tool</a>
-          <a href="/eink">e-ink export</a>
           <a href="/fabrication">fabrication</a>
-          <a href="/punchcard">punch card</a>
         </nav>
       </header>
 
@@ -47,9 +45,9 @@ export default function FabricationPage() {
             margin: "0 0 22px",
           }}
         >
-          from pixels
+          one grid,
           <br />
-          to stitches.
+          many machines.
         </h1>
         <p
           style={{
@@ -60,10 +58,11 @@ export default function FabricationPage() {
             margin: 0,
           }}
         >
-          exports a real, physically-sized SVG — a grid of dots for laser
-          engraving halftones, or a single serpentine stitch path for digitizing
-          an embroidery fill on felt. set the cell size in millimeters and the
-          output carries its true dimensions, ready to import directly.
+          the same binary grid, exported for whichever machine is doing the
+          making. right now: a grid of dots for laser engraving halftones, or a
+          single serpentine stitch path for digitizing an embroidery fill. real
+          millimeter dimensions throughout, ready to import directly. more
+          fabrication techniques land here as they're built.
         </p>
       </section>
 

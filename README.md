@@ -53,18 +53,6 @@ then open http://localhost:3000
   the seam, where two clean passes composited afterward don't.
 - `app/` — next.js app router pages, layout, global tokens.
 
-## removed / spun off
-
-- **e-ink export** — built, then removed. lived at `app/eink/` and
-  `components/EinkExport.tsx`, targeting the waveshare 10.3"/7.5"
-  panels with real bit-depth quantization. cut for scope, not because
-  it didn't work.
-- **punch card export** — built, then pulled out into its own
-  separate project, since a punch card pattern generator for the
-  KH-930 is its own practice, not just an export mode of an image
-  tool. see that project for anything punch-card related going
-  forward.
-
 ## roadmap (not yet built)
 
 - **more fabrication techniques** — the fabrication hub is designed

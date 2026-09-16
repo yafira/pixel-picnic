@@ -63,6 +63,7 @@ export default function Home() {
         >
           <a href="#">upload</a>
           <a href="/fabrication">fabrication</a>
+          <a href="/live">live</a>
         </nav>
       </header>
 

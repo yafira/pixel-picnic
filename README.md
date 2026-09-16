@@ -38,6 +38,19 @@ then open http://localhost:3000
 - `app/og/route.tsx` — settings-seeded OG image for shared links.
   shows the settings, not the photo, since nothing is ever uploaded
   to a server.
+- `lib/segmentation.ts` — wraps mediapipe's on-device selfie
+  segmentation model (`@mediapipe/tasks-vision`). runs entirely
+  client-side via wasm/GPU; the model file loads once from google's
+  CDN, then every frame after that stays local.
+- `components/LiveRegionDither.tsx` + `app/live/` — real-time,
+  region-aware dithering over your camera. the segmentation model
+  finds the subject; subject and background each get their own
+  algorithm/exposure instead of one setting applied to the whole
+  frame. `ditherRegionAware()` in `lib/dither.ts` runs each region as
+  a full independent pass and composites by mask afterward, rather
+  than mixing algorithms mid-diffusion — letting error-diffusion
+  noise cross a region boundary produces arbitrary artifacts right at
+  the seam, where two clean passes composited afterward don't.
 - `app/` — next.js app router pages, layout, global tokens.
 
 ## removed / spun off

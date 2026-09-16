@@ -1,6 +1,13 @@
-import FabricationExport from "@/components/FabricationExport";
+import type { Metadata } from "next";
+import LiveRegionDither from "@/components/LiveRegionDither";
 
-export default function FabricationPage() {
+export const metadata: Metadata = {
+  title: "pixel picnic — live",
+  description:
+    "real-time, region-aware dithering over your camera. an on-device segmentation model treats the subject and background differently -- nothing is ever sent anywhere.",
+};
+
+export default function LivePage() {
   return (
     <>
       <header
@@ -34,7 +41,7 @@ export default function FabricationPage() {
           className="mono"
           style={{ fontSize: 12, color: "var(--thread)", marginBottom: 18 }}
         >
-          concept 00 — construction, physical
+          concept 01 — construction, alive
         </div>
         <h1
           style={{
@@ -46,28 +53,28 @@ export default function FabricationPage() {
             margin: "0 0 22px",
           }}
         >
-          one grid,
+          one frame,
           <br />
-          many machines.
+          two treatments.
         </h1>
         <p
           style={{
             fontSize: 16,
             lineHeight: 1.6,
             color: "#3a382f",
-            maxWidth: 560,
+            maxWidth: 520,
             margin: 0,
           }}
         >
-          the same binary grid, exported for whichever machine is doing the
-          making. right now: a grid of dots for laser engraving halftones, or a
-          single serpentine stitch path for digitizing an embroidery fill. real
-          millimeter dimensions throughout, ready to import directly. more
-          fabrication techniques land here as they're built.
+          an on-device segmentation model finds the subject in your camera
+          feed, live -- the subject and the background each get their own
+          dither treatment instead of one setting applied uniformly. the
+          model and the dithering both run entirely in this tab; no frame
+          is ever sent anywhere.
         </p>
       </section>
 
-      <FabricationExport />
+      <LiveRegionDither />
 
       <footer
         className="mono"
@@ -80,7 +87,7 @@ export default function FabricationPage() {
           color: "var(--thread)",
         }}
       >
-        <span>pixel picnic — concept 00 — fabrication export</span>
+        <span>pixel picnic — concept 01</span>
         <span>2026</span>
       </footer>
     </>

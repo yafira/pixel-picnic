@@ -66,11 +66,11 @@ export default function LivePage() {
             margin: 0,
           }}
         >
-          an on-device segmentation model finds the subject in your camera
-          feed, live -- the subject and the background each get their own
-          dither treatment instead of one setting applied uniformly. the
-          model and the dithering both run entirely in this tab; no frame
-          is ever sent anywhere.
+          an on-device segmentation model finds the subject in your camera feed,
+          live -- the subject and the background each get their own dither
+          treatment instead of one setting applied uniformly. the model and the
+          dithering both run entirely in this tab; no frame is ever sent
+          anywhere.
         </p>
       </section>
 

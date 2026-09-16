@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, IBM_Plex_Mono } from "next/font/google";
+import { Archivo, IBM_Plex_Mono, Pixelify_Sans } from "next/font/google";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -15,6 +15,17 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500"],
 });
 
+// headline font only -- yafira's established brand/display font, used
+// the same way on yafira.xyz and altloom. pixelify sans only ships a
+// normal style (no true italic glyphs), so headlines using it switch
+// off the italic slant rather than getting a synthetic oblique, which
+// tends to look broken on pixel fonts.
+const pixelifySans = Pixelify_Sans({
+  subsets: ["latin"],
+  variable: "--font-pixel",
+  weight: ["400"],
+});
+
 export const metadata: Metadata = {
   title: "pixel picnic",
   description:
@@ -27,7 +38,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${plexMono.variable}`}>
+    <html
+      lang="en"
+      className={`${archivo.variable} ${plexMono.variable} ${pixelifySans.variable}`}
+    >
       <body>{children}</body>
     </html>
   );

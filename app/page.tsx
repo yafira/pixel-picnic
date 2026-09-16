@@ -76,11 +76,11 @@ export default function Home() {
         </div>
         <h1
           style={{
-            fontSize: "clamp(38px, 6vw, 74px)",
-            lineHeight: 0.98,
-            fontWeight: 700,
-            fontStyle: "italic",
-            letterSpacing: "-0.01em",
+            fontFamily: "var(--font-pixel)",
+            fontSize: "clamp(34px, 5.4vw, 66px)",
+            lineHeight: 1.1,
+            fontWeight: 400,
+            letterSpacing: "-0.005em",
             margin: "0 0 22px",
           }}
         >

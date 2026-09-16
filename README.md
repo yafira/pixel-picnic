@@ -1,6 +1,6 @@
 # pixel picnic
 
-a browser-based dithering tool, styled after maison margiela's raw,
+a browser-based dithering tool, styled and inspired after maison margiela's raw,
 unbranded, construction-exposed visual language. dithering as a kind
 of digital overpaint — degrading a photo down to the pixel seams
 instead of smoothing them away.

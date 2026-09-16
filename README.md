@@ -76,6 +76,6 @@ then open <http://localhost:3000>
 
 - **more fabrication techniques** — the fabrication hub is designed
   to grow; whatever's next goes here.
-- **link into tinytinker.tools** — this fits that collection of
+- **link into [tinytinker.tools](https://tinytinker.tools/)** — this fits that collection of
   browser-based maker tools; could move in as a route there instead
   of staying standalone.

@@ -1,5 +1,7 @@
 # pixel picnic
 
+![dither tool demo](/public/assets/pixel-picnic.png)
+
 a browser-based dithering tool, styled and inspired after maison margiela's raw,
 unbranded, construction-exposed visual language. dithering as a kind
 of digital overpaint — degrading a photo down to the pixel seams
@@ -9,6 +11,14 @@ the name's doing double duty: "pic" for picture, "picnic" for the
 casual, poke-around-and-see playground this is meant to be, against
 a look that's otherwise pretty severe.
 
+**[live demo →](https://pixel-picnic.vercel.app)**
+
+![dither tool demo](/public/assets/pixel-picnic2.gif)
+
+upload a photo, pick from four dithering algorithms (threshold,
+bayer 4×4, floyd–steinberg, atkinson), and tune grain/exposure/palette
+in real time with a before/after slider.
+
 ## running it
 
 ```
@@ -16,7 +26,7 @@ npm install
 npm run dev
 ```
 
-then open http://localhost:3000
+then open <http://localhost:3000>
 
 ## structure
 
@@ -35,6 +45,9 @@ then open http://localhost:3000
   currently: dots (laser engraving halftone) and stitch-path
   (embroidery fill digitizing reference), both real millimeter-sized
   SVG. more techniques land here over time.
+
+<!-- ![fabrication export demo](docs/demo-fabrication.gif) -->
+
 - `app/og/route.tsx` — settings-seeded OG image for shared links.
   shows the settings, not the photo, since nothing is ever uploaded
   to a server.
@@ -51,7 +64,13 @@ then open http://localhost:3000
   than mixing algorithms mid-diffusion — letting error-diffusion
   noise cross a region boundary produces arbitrary artifacts right at
   the seam, where two clean passes composited afterward don't.
+
+![live region-aware dithering demo](/public/assets/pixel-picnic.gif)
+
+**[try it live →](https://pixel-picnic.vercel.app/live)**
+
 - `app/` — next.js app router pages, layout, global tokens.
+  ]
 
 ## roadmap (not yet built)
 

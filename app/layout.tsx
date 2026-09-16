@@ -27,6 +27,14 @@ const pixelifySans = Pixelify_Sans({
 });
 
 export const metadata: Metadata = {
+  icons: {
+    icon: [
+      { url: "/public/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/public/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/public/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   title: "pixel picnic",
   description:
     "a browser-based dithering tool. expose the construction. nothing is uploaded anywhere.",

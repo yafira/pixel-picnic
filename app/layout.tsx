@@ -33,7 +33,7 @@ export const metadata: Metadata = {
       { url: "/public/favicon-32x32.png", sizes: "32x32", type: "image/png" },
       { url: "/public/icon-192.png", sizes: "192x192", type: "image/png" },
     ],
-    apple: "/apple-touch-icon.png",
+    apple: "/public/apple-touch-icon.png",
   },
   title: "pixel picnic",
   description:
